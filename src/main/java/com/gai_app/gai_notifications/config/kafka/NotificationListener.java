@@ -24,7 +24,8 @@ public class NotificationListener {
         NotificationModel notificationModel = new NotificationModel();
         List<Long> userIds = new ArrayList<>();
         userIds.add(-1L); //for head inspector
-        Pattern pattern = Pattern.compile("(\\w+) with (?:\\w+ )?id (\\d+|(?:\\[)(\\d+))(?:,\\s*(\\d+))*");
+        Pattern pattern = Pattern.compile
+                ("(\\w+) with (?:\\w+ )?id (\\d+|(?:\\[(\\d+)))?(?:,\\s*(\\d+))*");
         Matcher matcher = pattern.matcher(message);
         if (matcher.find()) {
             int groupCount = matcher.groupCount();
