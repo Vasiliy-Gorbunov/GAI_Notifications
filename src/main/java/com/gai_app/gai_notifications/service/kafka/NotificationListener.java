@@ -1,4 +1,4 @@
-package com.gai_app.gai_notifications.config.kafka;
+package com.gai_app.gai_notifications.service.kafka;
 
 import com.gai_app.gai_notifications.model.NotificationModel;
 import com.gai_app.gai_notifications.service.NotificationService;
@@ -25,18 +25,28 @@ public class NotificationListener {
         List<Long> userIds = new ArrayList<>();
         userIds.add(-1L); //for head inspector
         Pattern pattern = Pattern.compile
-                ("(\\w+) with (?:\\w+ )?id (\\d+|(?:\\[(\\d+)))?(?:,\\s*(\\d+))*");
+                ("(\\w+) with (?:\\w+ )?id (\\d+|\\[\\d+(?:,\\s(\\d+))*)");
         Matcher matcher = pattern.matcher(message);
         if (matcher.find()) {
-            int groupCount = matcher.groupCount();
-            String entity = matcher.group(1);
-            if (entity.equals("Car")) {
-                userIds.add(-3L); //for car inspector
-            } else {
-                userIds.add(-2L); //for owner inspector
-                for (int i = 2; i <= groupCount; i++) {
-                    userIds.add(Long.parseLong(matcher.group(i))); //for every owner
-                }
+            switch (matcher.group(1)) {
+                case "Owner":
+                case "License":
+                    userIds.add(-2L);
+                    userIds.add(Long.parseLong(matcher.group(2)));
+                    break;
+                case "Car":
+                    userIds.add(-3L);
+                    userIds.add(Long.parseLong(matcher.group(2)));
+                    break;
+                case "Passport":
+                    userIds.add(-2L);
+                    userIds.add(-3L);
+                    Pattern num = Pattern.compile("\\d+");
+                    Matcher match = num.matcher(matcher.group(2));
+                    while (match.find()) {
+                        userIds.add(Long.parseLong(match.group()));
+                    }
+                    break;
             }
         }
         notificationModel.setUserIds(userIds);
